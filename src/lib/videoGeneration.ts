@@ -50,9 +50,7 @@ export function buildVideoGenerationRequest(
 /**
  * Video generation entry point — swap the mock delay for a real API call when ready.
  */
-export async function generateVideo(request: unknown): Promise<string> {
-  console.log(request);
-
+export async function generateVideo(): Promise<string> {
   await new Promise((resolve) => setTimeout(resolve, 3000));
   return "mock";
 }

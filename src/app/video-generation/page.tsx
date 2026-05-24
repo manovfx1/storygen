@@ -13,7 +13,6 @@ import GenerateButton from "@/components/shared/GenerateButton";
 import VideoFrameUpload from "@/components/shared/VideoFrameUpload";
 import { PLATFORM_OPTIONS, STYLE_OPTIONS } from "@/lib/mockData";
 import {
-  buildVideoGenerationRequest,
   generateVideo,
   resolveDurationSeconds,
 } from "@/lib/videoGeneration";
@@ -111,22 +110,14 @@ export default function VideoGenerationPage() {
     setGeneratedVideo(null);
     resetPlayback();
     setLiked(false);
-
-    const request = buildVideoGenerationRequest({
-      prompt,
-      startFrame,
-      endFrame,
-      platform,
-      style,
-      duration,
-      quality,
-    });
-
-    const result = await generateVideo(request);
+  
+    const result = await generateVideo();
+  
     setGeneratedVideo(result);
     setGenerating(false);
   };
 
+  
   const togglePlay = () => {
     if (!generatedVideo) return;
 
