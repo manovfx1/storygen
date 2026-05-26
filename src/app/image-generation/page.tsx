@@ -13,10 +13,10 @@ import StyleSelector from "@/components/shared/StyleSelector";
 import GenerateButton from "@/components/shared/GenerateButton";
 import { PLATFORM_OPTIONS, STYLE_OPTIONS } from "@/lib/mockData";
 import { enhancePrompt } from "@/lib/enhancePrompt";
+import { saveImageCreation } from "@/lib/creationsStorage";
 import {
   buildImageGenerationRequest,
   generateImages,
-  resolveImageCount,
 } from "@/lib/imageGeneration";
 import { Download, Heart } from "lucide-react";
 
@@ -73,6 +73,15 @@ export default function ImageGenerationPage() {
 
       const images = await generateImages(request);
       setGeneratedImages(images);
+
+      images.forEach((imageUrl) => {
+        saveImageCreation({
+          prompt: request.prompt,
+          style: request.style,
+          aspectRatio: request.aspectRatio,
+          imageUrl,
+        });
+      });
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to generate image"
@@ -81,8 +90,6 @@ export default function ImageGenerationPage() {
       setGenerating(false);
     }
   };
-
-  const activeImageCount = resolveImageCount(imageCount);
 
   const toggleLike = (index: number) => {
     setLikedImages((prev) => {
@@ -196,7 +203,7 @@ export default function ImageGenerationPage() {
                 <div className="text-center">
                   <div className="mx-auto mb-3 h-12 w-12 animate-spin rounded-full border-2 border-accent/30 border-t-accent" />
                   <p className="font-inter text-sm text-text-muted">
-                    Generating your image{activeImageCount > 1 ? "s" : ""}...
+                    Generating...
                   </p>
                 </div>
               </div>

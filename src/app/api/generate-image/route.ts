@@ -3,18 +3,7 @@ import { GoogleGenAI } from "@google/genai";
 
 const IMAGE_MODEL = "gemini-2.5-flash-image";
 
-const SUPPORTED_ASPECT_RATIOS = new Set([
-  "1:1",
-  "2:3",
-  "3:2",
-  "3:4",
-  "4:3",
-  "4:5",
-  "5:4",
-  "9:16",
-  "16:9",
-  "21:9",
-]);
+const SUPPORTED_ASPECT_RATIOS = new Set(["1:1", "9:16", "16:9", "4:5"]);
 
 interface GenerateImageRequest {
   prompt: string;
@@ -48,12 +37,17 @@ function parseRequestBody(body: unknown): GenerateImageRequest | null {
   };
 }
 
-function buildImagePrompt(prompt: string, style: string): string {
-  if (style) {
-    return `${prompt}\nStyle: ${style}`;
-  }
-
-  return prompt;
+function buildImagePrompt(
+  prompt: string,
+  style: string,
+  aspectRatio: string
+): string {
+  return `Create a professional high-quality image.
+Style: ${style || "Default"}
+Aspect Ratio: ${aspectRatio}
+User Prompt:
+${prompt}
+Generate a highly detailed, photorealistic image with cinematic lighting, sharp focus, realistic textures, professional composition, rich colors, depth of field, and commercial advertising quality.`;
 }
 
 export async function POST(request: NextRequest) {
@@ -97,7 +91,7 @@ export async function POST(request: NextRequest) {
     }
 
     const genAI = new GoogleGenAI({ apiKey });
-    const fullPrompt = buildImagePrompt(prompt, style);
+    const fullPrompt = buildImagePrompt(prompt, style, aspectRatio);
 
     const response = await genAI.models.generateContent({
       model: IMAGE_MODEL,
