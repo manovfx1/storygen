@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Urbanist } from "next/font/google";
+import AppToaster from "@/components/ui/AppToaster";
 import "./globals.css";
 
 const urbanist = Urbanist({
@@ -31,6 +32,7 @@ export default function RootLayout({
         className={`${urbanist.variable} ${inter.variable} bg-background font-inter text-text antialiased`}
       >
         {children}
+        <AppToaster />
       </body>
     </html>
   );

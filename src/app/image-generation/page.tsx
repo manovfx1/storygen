@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import PromptArea, {
   ModelOption,
@@ -11,6 +12,7 @@ import PlatformSelector from "@/components/shared/PlatformSelector";
 import StyleSelector from "@/components/shared/StyleSelector";
 import GenerateButton from "@/components/shared/GenerateButton";
 import { PLATFORM_OPTIONS, STYLE_OPTIONS } from "@/lib/mockData";
+import { enhancePrompt } from "@/lib/enhancePrompt";
 import {
   buildImageGenerationRequest,
   generateImages,
@@ -22,8 +24,6 @@ const IMAGE_MODELS: ModelOption[] = [
   { id: "openai", label: "Open AI" },
   { id: "gemini", label: "Gemini AI" },
 ];
-
-const ENHANCED_PROMPT = `Ultra-premium luxury perfume advertisement, a golden amber perfume bottle nestled inside a blooming crystal-glass flower with realistic transparent petals and elegant reflections. Dark cinematic background with subtle fog, soft volumetric light rays, and delicate floating gold particles. Three-point studio lighting creates dramatic highlights and refined shadows. Bottle label reads holy in small elegant lettering, 1872 in a prominent vintage luxury serif font, and Vanilla Fragrance beneath. Photorealistic product photography, centered composition, luxury branding aesthetic, ultra-detailed glass materials, sophisticated and timeless atmosphere, 4:5 aspect ratio.`;
 
 function toggleSelection<T extends string>(current: T | null, value: T): T | null {
   return current === value ? null : value;
@@ -41,26 +41,45 @@ export default function ImageGenerationPage() {
   const [likedImages, setLikedImages] = useState<Set<number>>(new Set());
 
   const handleEnhance = async () => {
+    if (!prompt.trim()) return;
+
     setEnhancing(true);
-    await new Promise((r) => setTimeout(r, 1800));
-    setPrompt(ENHANCED_PROMPT);
-    setEnhancing(false);
+    try {
+      const enhancedPrompt = await enhancePrompt(prompt);
+      setPrompt(enhancedPrompt);
+    } catch (error) {
+      console.error("Failed to enhance prompt:", error);
+    } finally {
+      setEnhancing(false);
+    }
   };
 
   const handleGenerate = async () => {
+    if (!prompt.trim()) {
+      toast.error("Please enter a prompt before generating.");
+      return;
+    }
+
     setGenerating(true);
     setGeneratedImages([]);
 
-    const request = buildImageGenerationRequest({
-      prompt,
-      platform,
-      style,
-      imageCount,
-    });
+    try {
+      const request = buildImageGenerationRequest({
+        prompt,
+        platform,
+        style,
+        imageCount,
+      });
 
-    const images = await generateImages(request);
-    setGeneratedImages(images);
-    setGenerating(false);
+      const images = await generateImages(request);
+      setGeneratedImages(images);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to generate image"
+      );
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const activeImageCount = resolveImageCount(imageCount);
@@ -173,12 +192,13 @@ export default function ImageGenerationPage() {
                 </div>
               </div>
             ) : generating ? (
-              <div className="grid h-full grid-cols-2 gap-3">
-                {[...Array(activeImageCount)].map(
-                  (_, i) => (
-                    <div key={i} className="aspect-square rounded-xl shimmer glass-surface" />
-                  )
-                )}
+              <div className="flex h-full items-center justify-center rounded-2xl border border-border/60 bg-[#0a0a0a]">
+                <div className="text-center">
+                  <div className="mx-auto mb-3 h-12 w-12 animate-spin rounded-full border-2 border-accent/30 border-t-accent" />
+                  <p className="font-inter text-sm text-text-muted">
+                    Generating your image{activeImageCount > 1 ? "s" : ""}...
+                  </p>
+                </div>
               </div>
             ) : (
               <div className="grid h-full grid-cols-2 gap-3 overflow-hidden">

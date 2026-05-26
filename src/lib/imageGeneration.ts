@@ -14,13 +14,6 @@ export interface ImageGenerationSettingsInput {
   imageCount: string | null;
 }
 
-const MOCK_GENERATED_IMAGES = [
-  "https://images.unsplash.com/photo-1541643600914-78b084683702?w=500",
-  "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500",
-  "https://images.unsplash.com/photo-1594938298603-c8148c4b4c03?w=500",
-  "https://images.unsplash.com/photo-1566677914817-56426959ae9c?w=500",
-];
-
 export function resolveAspectRatio(platformId: string | null): string {
   if (!platformId) return "1:1";
   const platform = PLATFORM_OPTIONS.find((option) => option.id === platformId);
@@ -49,12 +42,38 @@ export function buildImageGenerationRequest(
   };
 }
 
-/**
- * Image generation entry point — swap the mock delay for a real API call when ready.
- */
+async function generateImage(
+  request: Pick<ImageGenerationRequest, "prompt" | "aspectRatio" | "style">
+): Promise<string> {
+  const response = await fetch("/api/generate-image", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      prompt: request.prompt,
+      aspectRatio: request.aspectRatio,
+      style: request.style,
+    }),
+  });
+
+  const data: { imageUrl?: string; error?: string } = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error ?? "Failed to generate image");
+  }
+
+  if (!data.imageUrl) {
+    throw new Error("Invalid response from generate image API");
+  }
+
+  return data.imageUrl;
+}
+
 export async function generateImages(
   request: ImageGenerationRequest
 ): Promise<string[]> {
-  await new Promise((resolve) => setTimeout(resolve, 2500));
-  return MOCK_GENERATED_IMAGES.slice(0, request.imageCount);
+  const { imageCount, ...payload } = request;
+
+  return Promise.all(
+    Array.from({ length: imageCount }, () => generateImage(payload))
+  );
 }

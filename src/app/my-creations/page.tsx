@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { MOCK_IMAGES, MOCK_VIDEOS } from "@/lib/mockData";
+import type { MockCreation } from "@/lib/mockData";
 import { Download, Heart, Play, Image as ImageIcon, Video, Grid3X3, List } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -12,9 +12,12 @@ export default function MyCreationsPage() {
   const [filter, setFilter] = useState<Filter>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
+  const [creations] = useState<MockCreation[]>([]);
 
-  const allItems = [...MOCK_IMAGES, ...MOCK_VIDEOS];
-  const filtered = filter === "all" ? allItems : allItems.filter((i) => i.type === filter);
+  const filtered =
+    filter === "all"
+      ? creations
+      : creations.filter((item) => item.type === filter);
 
   const toggleLike = (id: string) => {
     setLikedItems((prev) => {
@@ -82,8 +85,11 @@ export default function MyCreationsPage() {
           </div>
         </div>
 
-        {/* Grid view */}
-        {viewMode === "grid" && (
+        {filtered.length === 0 ? (
+          <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-border/60 bg-[#0a0a0a]">
+            <p className="font-inter text-sm text-text-dim">No creations yet</p>
+          </div>
+        ) : viewMode === "grid" ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {filtered.map((item) => (
               <div key={item.id} className="group relative rounded-xl overflow-hidden glass-card">
@@ -134,10 +140,7 @@ export default function MyCreationsPage() {
               </div>
             ))}
           </div>
-        )}
-
-        {/* List view */}
-        {viewMode === "list" && (
+        ) : (
           <div className="space-y-2">
             {filtered.map((item) => (
               <div

@@ -87,10 +87,10 @@ export default function PromptArea({
         <button
           type="button"
           onClick={onEnhance}
-          disabled={enhancing}
+          disabled={enhancing || !value.trim()}
           className={cn(
             "btn-enhancer flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold",
-            enhancing && "cursor-not-allowed opacity-70"
+            (enhancing || !value.trim()) && "cursor-not-allowed opacity-70"
           )}
         >
           <Sparkles className="h-3.5 w-3.5" />

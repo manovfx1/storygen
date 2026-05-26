@@ -69,17 +69,14 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen min-h-[100dvh] items-center justify-center overflow-hidden">
-      {/* Full-page background */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url('${LOGIN_BG_SRC}')` }}
         aria-hidden
       />
 
-      {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/45" aria-hidden />
 
-      {/* Login card */}
       <div className="login-card-border-wrap relative z-10 mx-4 w-full max-w-sm">
         <div className="login-glass-card relative rounded-2xl p-8 backdrop-blur-xl">
           <div className="mb-8 flex flex-col items-center">
@@ -94,78 +91,78 @@ export default function LoginPage() {
             <h1 className="text-xl font-semibold text-white">Welcome to StoryGen</h1>
           </div>
 
-        <div className="space-y-3">
-          <input
-            type="text"
-            placeholder="Username or Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="glass-input w-full rounded-xl px-4 py-3 text-sm text-text placeholder-text-dim transition-all focus:border-accent/50 focus:outline-none"
-          />
-          <div className="relative">
+          <div className="space-y-3">
             <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="glass-input w-full rounded-xl px-4 py-3 pr-10 text-sm text-text placeholder-text-dim transition-all focus:border-accent/50 focus:outline-none"
+              type="text"
+              placeholder="Username or Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="glass-input w-full rounded-xl px-4 py-3 text-sm text-text placeholder-text-dim transition-all focus:border-accent/50 focus:outline-none"
             />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="glass-input w-full rounded-xl px-4 py-3 pr-10 text-sm text-text placeholder-text-dim transition-all focus:border-accent/50 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-text-dim transition-all duration-300 ease hover:scale-[1.02] hover:text-text-muted"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-text-dim transition-all duration-300 ease hover:scale-[1.02] hover:text-text-muted"
+              onClick={handleLogin}
+              className="btn-login-primary block w-full rounded-xl py-3 text-center text-sm font-semibold"
             >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
+              Log in
             </button>
-          </div>
 
-          <button
-            type="button"
-            onClick={handleLogin}
-            className="btn-login-primary block w-full rounded-xl py-3 text-center text-sm font-semibold"
-          >
-            Log in
-          </button>
+            <div className="flex items-center gap-3 py-1">
+              <div className="h-px flex-1 bg-white/10" />
+              <span className="text-xs uppercase tracking-wide text-white/50">OR</span>
+              <div className="h-px flex-1 bg-white/10" />
+            </div>
 
-          <div className="flex items-center gap-3 py-1">
-            <div className="h-px flex-1 bg-white/10" />
-            <span className="text-xs uppercase tracking-wide text-white/50">OR</span>
-            <div className="h-px flex-1 bg-white/10" />
-          </div>
-
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            disabled={socialLoading !== null}
-            className="btn-login-social flex w-full items-center justify-center gap-3 rounded-xl bg-[#22c55e] px-4 py-3 text-sm font-semibold text-black transition-all duration-300 ease hover:bg-[#1ebe57] disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            <GoogleIcon className="h-5 w-5 shrink-0" />
-            {socialLoading === "google" ? "Signing in..." : "Log in with Google"}
-          </button>
-
-          <button
-            type="button"
-            onClick={handleAppleSignIn}
-            disabled={socialLoading !== null}
-            className="btn-login-social flex w-full items-center justify-center gap-2.5 rounded-xl border border-black/10 bg-white px-4 py-3 text-sm font-medium text-black shadow-sm transition-all duration-300 ease hover:bg-[#f5f5f7] active:bg-[#ebebed] disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            <FaApple className="h-[18px] w-[18px] shrink-0" aria-hidden />
-            {socialLoading === "apple" ? "Signing in..." : "Continue with Apple"}
-          </button>
-
-          <div className="pt-1 text-center">
             <button
               type="button"
-              className="cursor-pointer text-sm text-white/70 transition-all duration-300 ease hover:scale-[1.02] hover:text-white"
+              onClick={handleGoogleSignIn}
+              disabled={socialLoading !== null}
+              className="btn-login-social flex w-full items-center justify-center gap-3 rounded-xl bg-[#22c55e] px-4 py-3 text-sm font-semibold text-black transition-all duration-300 ease hover:bg-[#1ebe57] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              Forgot Password
+              <GoogleIcon className="h-5 w-5 shrink-0" />
+              {socialLoading === "google" ? "Signing in..." : "Log in with Google"}
             </button>
+
+            <button
+              type="button"
+              onClick={handleAppleSignIn}
+              disabled={socialLoading !== null}
+              className="btn-login-social flex w-full items-center justify-center gap-2.5 rounded-xl border border-black/10 bg-white px-4 py-3 text-sm font-medium text-black shadow-sm transition-all duration-300 ease hover:bg-[#f5f5f7] active:bg-[#ebebed] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <FaApple className="h-[18px] w-[18px] shrink-0" aria-hidden />
+              {socialLoading === "apple" ? "Signing in..." : "Continue with Apple"}
+            </button>
+
+            <div className="pt-1 text-center">
+              <button
+                type="button"
+                className="cursor-pointer text-sm text-white/70 transition-all duration-300 ease hover:scale-[1.02] hover:text-white"
+              >
+                Forgot Password
+              </button>
+            </div>
           </div>
-        </div>
         </div>
       </div>
     </div>
