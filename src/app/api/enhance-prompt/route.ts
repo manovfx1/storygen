@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const ENHANCE_SYSTEM_PROMPT =
-  "You are a creative prompt enhancement assistant for AI image and video generation. Improve the user's prompt with clearer details, style cues, composition, lighting, and motion where relevant. Return only the enhanced prompt text with no preamble or explanation.";
+  "You are a creative prompt enhancement assistant for AI image generation. Improve the user's prompt with clearer details, style cues, composition, and lighting. Return only the enhanced prompt text with no preamble or explanation.";
 
 export async function POST(request: NextRequest) {
   try {

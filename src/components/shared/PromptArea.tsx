@@ -27,6 +27,7 @@ interface PromptAreaProps {
   textareaClassName?: string;
   headerSlot?: React.ReactNode;
   showLabel?: boolean;
+  enhanceLabel?: string;
 }
 
 export default function PromptArea({
@@ -42,6 +43,7 @@ export default function PromptArea({
   textareaClassName,
   headerSlot,
   showLabel = true,
+  enhanceLabel = "Prompt Enhancer",
 }: PromptAreaProps) {
   return (
     <div className="glass-card overflow-hidden rounded-xl">
@@ -94,7 +96,7 @@ export default function PromptArea({
           )}
         >
           <Sparkles className="h-3.5 w-3.5" />
-          {enhancing ? "Enhancing..." : "Prompt Enhancer"}
+          {enhancing ? "Enhancing..." : enhanceLabel}
         </button>
       </div>
     </div>

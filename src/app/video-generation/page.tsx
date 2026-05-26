@@ -13,7 +13,7 @@ import StyleSelector from "@/components/shared/StyleSelector";
 import GenerateButton from "@/components/shared/GenerateButton";
 import VideoFrameUpload from "@/components/shared/VideoFrameUpload";
 import { PLATFORM_OPTIONS, STYLE_OPTIONS } from "@/lib/mockData";
-import { enhancePrompt } from "@/lib/enhancePrompt";
+import { enhanceVideoPrompt } from "@/lib/enhanceVideoPrompt";
 import {
   buildVideoGenerationRequest,
   generateVideo,
@@ -87,7 +87,7 @@ export default function VideoGenerationPage() {
 
     setEnhancing(true);
     try {
-      const enhancedPrompt = await enhancePrompt(prompt);
+      const enhancedPrompt = await enhanceVideoPrompt(prompt);
       setPrompt(enhancedPrompt);
     } catch (error) {
       toast.error(
@@ -210,6 +210,7 @@ export default function VideoGenerationPage() {
               onChange={setPrompt}
               onEnhance={handleEnhance}
               enhancing={enhancing}
+              enhanceLabel="Video Prompt Enhancer"
               models={VIDEO_MODELS}
               selectedModel={selectedModel}
               onModelChange={(id) =>
