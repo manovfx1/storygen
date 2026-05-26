@@ -7,7 +7,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { FaApple } from "react-icons/fa";
 import { signInWithApple, signInWithGoogle } from "@/lib/auth/socialAuth";
 
-const LOGIN_BG_SRC = "/Images/login-bg.jpeg";
+const LOGIN_BG_SRC = "/images/login-bg.jpeg";
 const LOGIN_LOGO_SRC = "/logos/logo only.png";
 
 function GoogleIcon({ className }: { className?: string }) {

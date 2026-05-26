@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Home, Image as ImageIcon, Video, FolderOpen, Settings } from "lucide-react";
 import StoryGenLogo, { SIDEBAR_LOGO_HEIGHT } from "@/components/shared/StoryGenLogo";
 
-const MOUNTAIN_LOGO_SRC = "/Images/Mountain Logo.png";
+const MOUNTAIN_LOGO_SRC = "/images/Mountain Logo.png";
 
 const navItems = [
   { href: "/dashboard", label: "Home Page", icon: Home },
