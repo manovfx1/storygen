@@ -87,7 +87,10 @@ export default function VideoGenerationPage() {
 
     setEnhancing(true);
     try {
-      const enhancedPrompt = await enhanceVideoPrompt(prompt);
+      const enhancedPrompt = await enhanceVideoPrompt(prompt, {
+        hasStartFrame: Boolean(startFrame),
+        hasEndFrame: Boolean(endFrame),
+      });
       setPrompt(enhancedPrompt);
     } catch (error) {
       toast.error(

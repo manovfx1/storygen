@@ -1,8 +1,20 @@
-export async function enhanceVideoPrompt(prompt: string): Promise<string> {
+export interface EnhanceVideoPromptOptions {
+  hasStartFrame?: boolean;
+  hasEndFrame?: boolean;
+}
+
+export async function enhanceVideoPrompt(
+  prompt: string,
+  options: EnhanceVideoPromptOptions = {}
+): Promise<string> {
   const response = await fetch("/api/enhance-video-prompt", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt }),
+    body: JSON.stringify({
+      prompt,
+      hasStartFrame: options.hasStartFrame ?? false,
+      hasEndFrame: options.hasEndFrame ?? false,
+    }),
   });
 
   const data: { enhancedPrompt?: string; error?: string } = await response.json();

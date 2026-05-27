@@ -1,46 +1,125 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const VIDEO_ENHANCE_SYSTEM_PROMPT = `You are a professional film director, cinematographer, and AI video prompt engineer.
+const MAX_ENHANCED_PROMPT_LENGTH = 500;
 
-Your task is to transform a simple user idea into a high-quality cinematic AI video prompt suitable for Runway, Veo, Kling, Pika, Luma, and other video generation models.
+const VIDEO_ENHANCE_SYSTEM_PROMPT = `You are a professional animation director and cinematic AI video prompt engineer for RunwayML, Veo, Kling, Pika, Luma, and similar video generation models.
 
-Rules:
+Your task is to transform a short user idea into a concise cinematic motion direction prompt.
 
-1. Preserve the user's original subject and concept.
-2. Describe character movement and actions.
-3. Describe camera movement.
-4. Describe environmental motion.
-5. Describe lighting and atmosphere.
-6. Describe cinematic composition.
-7. Include realistic motion details.
-8. Include timing and pacing.
-9. Avoid image-generation terminology.
-10. Output only the enhanced video prompt.
+CRITICAL RULES:
+1. Output ONLY 1-4 short sentences maximum.
+2. Maximum 500 characters total.
+3. Keep the result SHORT and CINEMATIC. Never write long image-style descriptive paragraphs.
+4. Focus ONLY on: camera movement, motion, subject animation, cinematic action, transitions, and atmosphere.
+5. Do NOT describe static visual details such as appearance, clothing, colors, environments, or object design unless absolutely essential to explain the motion.
+6. No story writing. No long paragraphs. No unnecessary visual descriptions.
+7. Prioritize motion over appearance. Prioritize cinematic direction over scene description.
+8. Output only the enhanced prompt with no preamble, labels, or explanation.
 
-Enhancement Structure:
+WHEN START OR END FRAME IMAGES ARE UPLOADED:
+- Assume the uploaded image(s) already define all visual appearance.
+- Do NOT over-describe characters, objects, clothing, colors, or environments.
+- ONLY enhance motion, camera behavior, timing, pacing, and cinematic action.
 
-- Subject description
-- Action description
-- Camera movement
-- Environmental motion
-- Lighting
-- Cinematic style
-- Quality descriptors
+SUITABLE FOCUS:
+- Camera movement (push-in, tracking, orbit, handheld, dolly, reveal, pan, tilt)
+- Subject animation and natural motion
+- Transitions and pacing
+- Subtle atmospheric motion
+- Brief cinematic quality cues at the end if needed
 
 Examples:
 
 Input:
-"A coffee cup"
+"camera move closely and bottle rotate slowly, cap opens and water splash"
 
 Output:
-A pristine ceramic coffee cup resting on a rustic wooden table inside a cozy café. Gentle steam continuously rises from the freshly brewed coffee while warm morning sunlight streams through nearby windows. The camera slowly pushes forward in a smooth cinematic dolly movement, creating a sense of intimacy and warmth. Soft dust particles drift through the sunlight beams. Subtle reflections shimmer across the cup's glossy surface. Shallow depth of field, realistic motion, cinematic lighting, natural atmosphere, commercial advertisement quality, ultra-smooth camera movement, photorealistic animation.
+Slow cinematic push-in toward the bottle. The bottle rotates gently while the cap twists open naturally. Water splashes dynamically with realistic liquid motion and soft cinematic lighting.
 
 Input:
-"A fantasy castle"
+"person walking"
 
 Output:
-A magnificent crystal castle floating above the clouds during golden sunset. The clouds slowly drift around the structure while glowing magical particles swirl through the air. The camera performs a slow orbital movement around the castle revealing intricate architectural details. Sunlight reflects across crystal towers creating dynamic highlights and sparkling effects. Atmospheric fog gently rolls between floating islands. Epic fantasy cinematic style, smooth camera motion, volumetric lighting, realistic environmental animation, high-end movie quality.`;
+Smooth handheld tracking shot following the subject walking forward naturally. Subtle body movement, cinematic pacing, and soft atmospheric motion.
+
+Input:
+"robot turning on"
+
+Output:
+Slow cinematic reveal as the robot powers on. Mechanical parts activate with subtle motion, glowing lights, and dramatic camera movement.
+
+Input (with uploaded start/end frame):
+"bottle spins"
+
+Output:
+Slow orbital camera movement around the subject. The bottle spins smoothly with natural rotation and cinematic pacing.`;
+
+interface EnhanceVideoPromptRequest {
+  prompt: string;
+  hasStartFrame: boolean;
+  hasEndFrame: boolean;
+}
+
+function parseRequestBody(body: unknown): EnhanceVideoPromptRequest | null {
+  if (typeof body !== "object" || body === null) {
+    return null;
+  }
+
+  const record = body as Record<string, unknown>;
+
+  if (typeof record.prompt !== "string" || !record.prompt.trim()) {
+    return null;
+  }
+
+  return {
+    prompt: record.prompt.trim(),
+    hasStartFrame: record.hasStartFrame === true,
+    hasEndFrame: record.hasEndFrame === true,
+  };
+}
+
+function buildUserMessage(
+  prompt: string,
+  hasStartFrame: boolean,
+  hasEndFrame: boolean
+): string {
+  const lines = [`User prompt:\n${prompt}`];
+
+  if (hasStartFrame || hasEndFrame) {
+    const uploadedFrames = [
+      hasStartFrame ? "start frame" : null,
+      hasEndFrame ? "end frame" : null,
+    ].filter(Boolean);
+
+    lines.push(
+      `Context: The user uploaded ${uploadedFrames.join(" and ")} image(s). Visual appearance is already defined by the upload(s). Enhance motion and cinematic direction only. Do not describe appearance.`
+    );
+  }
+
+  return lines.join("\n\n");
+}
+
+function trimEnhancedPrompt(text: string): string {
+  const trimmed = text.trim();
+
+  if (trimmed.length <= MAX_ENHANCED_PROMPT_LENGTH) {
+    return trimmed;
+  }
+
+  const truncated = trimmed.slice(0, MAX_ENHANCED_PROMPT_LENGTH);
+  const lastSentenceEnd = Math.max(
+    truncated.lastIndexOf("."),
+    truncated.lastIndexOf("!"),
+    truncated.lastIndexOf("?")
+  );
+
+  if (lastSentenceEnd > MAX_ENHANCED_PROMPT_LENGTH * 0.6) {
+    return truncated.slice(0, lastSentenceEnd + 1).trim();
+  }
+
+  return truncated.trimEnd();
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,20 +143,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const prompt =
-      typeof body === "object" &&
-      body !== null &&
-      "prompt" in body &&
-      typeof (body as { prompt: unknown }).prompt === "string"
-        ? (body as { prompt: string }).prompt.trim()
-        : "";
+    const parsed = parseRequestBody(body);
 
-    if (!prompt) {
+    if (!parsed) {
       return NextResponse.json(
         { error: "A non-empty prompt string is required" },
         { status: 400 }
       );
     }
+
+    const { prompt, hasStartFrame, hasEndFrame } = parsed;
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
@@ -85,8 +160,10 @@ export async function POST(request: NextRequest) {
       systemInstruction: VIDEO_ENHANCE_SYSTEM_PROMPT,
     });
 
-    const result = await model.generateContent(prompt);
-    const enhancedPrompt = result.response.text()?.trim();
+    const result = await model.generateContent(
+      buildUserMessage(prompt, hasStartFrame, hasEndFrame)
+    );
+    const enhancedPrompt = trimEnhancedPrompt(result.response.text() ?? "");
 
     if (!enhancedPrompt) {
       return NextResponse.json(
