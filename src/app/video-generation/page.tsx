@@ -213,7 +213,7 @@ export default function VideoGenerationPage() {
               onChange={setPrompt}
               onEnhance={handleEnhance}
               enhancing={enhancing}
-              enhanceLabel="Video Prompt Enhancer"
+              enhanceLabel="Prompt Enhancer"
               models={VIDEO_MODELS}
               selectedModel={selectedModel}
               onModelChange={(id) =>
