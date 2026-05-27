@@ -35,7 +35,7 @@ const videoCardIconClass =
 
 export default function DashboardPage() {
   return (
-    <DashboardLayout>
+    <DashboardLayout lockViewport>
       <div className="flex min-h-[calc(100vh-3rem)] flex-col items-center px-8 pb-16 pt-12 md:pt-16 lg:pt-20">
         {/* Hero */}
         <div className="animate-fade-in mb-12 text-center md:mb-14 lg:mb-16">
